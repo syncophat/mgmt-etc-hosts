@@ -27,7 +27,7 @@ function printTable(){
     then
         local -r numberOfLines="$(wc -l <<< "${data}")"
 
-        if [[ "${numberOfLines}" -gt '0' ]]
+        if [[ "${numberOfLines}" -gt '0' ]];
         then
             local table=''
             local i=1
@@ -110,13 +110,16 @@ function helpPanel(){
   echo -e "\n${redColour}[!] Uso: ./sdev${endColour}"
   for i in $(seq 1 80); do echo -ne "${redColour}-"; done; echo -ne "${endColour}"
   echo -e "\n\n\t${grayColour}[-e]${endColour}${yellowColour} Modo Exploración${endColour}"
-  echo -e "\t\t${purpleColour}busqueda_IP${endColour}${grayColour}[-e][-i]${endColour}${yellowColour}: Busca un Dev por IP${endColour}${blueColour}(ejemplo .\sdev -e busqueda_IP -i 192.168.0.0 )"
-  echo -e "\t\t${purpleColour}busqueda_HOST${endColour}${grayColour}[-e][-j]${endColour}${yellowColour}: Busca un Dev por hostname${endColour}${blueColour}(ejemplo .\sdev -e busqueda_HOST -j hostname )"
+  echo -e "\t\t${purpleColour}busqueda_IP${endColour}${grayColour}[-e][-i]${endColour}${yellowColour}: Busca un Dev por IP${endColour}${blueColour}(ejemplo ./mgmt-etc-hosts.sh -e busqueda_IP -i 192.168.0.0 )"
+  echo -e "\t\t${purpleColour}busqueda_HOST${endColour}${grayColour}[-e][-j]${endColour}${yellowColour}: Busca un Dev por hostname${endColour}${blueColour}(ejemplo ./mgmt-etc-hosts.sh -e busqueda_HOST -j hostname )"
   echo -e "\n\n\t${grayColour}[-a]${endColour}${yellowColour}Modo alta y cambios${endColour}"
-  echo -e "\t\t${purpleColour}alta${endColour}${yellowColour}:\t\t\t Agrega un Dev en la lista${blueColour}(ejemplo .\sdev -a alta -b 192.168.0.0 -c dev.com)${endColour}"
-  echo -e "\t\t${purpleColour}baja${endColour}${yellowColour}:\t\t\t Elimina un Dev en la lista${endColour}"
   echo -e "\t\t${purpleColour}cambios${endColour}${yellowColour}:\t\t\t Cambio de Host o IP${endColour}"
+  echo -e "\t\t${purpleColour}alta${endColour}${yellowColour}:\t\t\t Agrega un Dev en la lista${blueColour}(ejemplo ./mgmt-etc-hosts.sh -a alta -b 192.168.0.0 -c dev.com)${endColour}"
+  echo -e "\t\t${purpleColour}baja${endColour}${yellowColour}:\t\t\t Elimina un Dev en la lista${endColour}${blueColour}(ejemplo ./mgmt-etc-hosts.sh -a baja -d 192.168.0.0 -f dev.com)${endColour}"
+  echo -e "\n\t${grayColour}remplazo${endColour}${yellowColour} Cambiar IP o HOST del archivo hosts${endColour}"
+  echo -e "\t\t${purpleColour}[-b -c -d -f]${endColour}${yellowColour}:\t\t\t IP y host en $ETC_HOSTS y IP y host a remplazar${endColour}${blueColour} ejemplo: .\mgmt-etc-hosts -a cambio -b 192.168.0.0 -c dev.com -d 192.168.1.0 -f dev.net${endColour}"
   echo -e "\n\t${grayColour}[-h]${endColour}${yellowColour} Mostrar este panel de ayuda${endColour}"
+  
   
   tput cnorm; exit 1
 }
@@ -125,27 +128,29 @@ function search_IP(){
   ip=$1
   echo '' > ips.tmp
   while [ "$(cat ips.tmp | wc -l)" == "1" ]; do 
-    $(cat $ETC_HOSTS | grep $ip  > ips.tmp) 
+    $(cat $ETC_HOSTS | grep $ip  >> ips.tmp) 
   done
   Hostname=$(cat ips.tmp | grep $ip | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')
-  echo "IP~Host" >ips2.table
+  echo "IP~Host" > ips2.table
+  echo '' > ips.table
   for ips in $Hostname; do
-    echo "${ips}~$(cat ips.tmp | grep "^$ips" | awk '{print $2}')" >> ips.table
+     echo "${ips}~$(cat ips.tmp | grep "^$ips" | awk '{print $2}')" >> ips.table
   done
-  echo "$(cat ips.table | grep -E $ip | sort -n  | uniq )">> ips2.table
-  printTable '~' "$(cat ips2.table)"
-  rm ips*
-  tput cnorm;
-}
+    echo "$(cat ips.table | grep -E $ip | sort -n  | uniq )">> ips2.table
+    printTable '~' "$(cat ips2.table)"
+    rm ips*
+    tput cnorm;
+   }
 function search_HOST(){
   #HOSTNAME a consultar
   hosts=$1
   echo '' > ips.tmp
   while [ "$(cat ips.tmp | wc -l)" == "1" ]; do 
-    $(cat $ETC_HOSTS | grep $hosts > ips.tmp)
+    $(cat $ETC_HOSTS | grep $hosts >> ips.tmp)
   done
-  echo "Host~IP" >ips2.table 
+  echo "Host~IP" > ips2.table
   Hostname=$(cat ips.tmp | grep $hosts | awk '{print $2}')
+  echo '' > ips.table 
   for hostname in $Hostname; do 
     echo "${hostname}~$(cat ips.tmp | grep $hostname | awk '{print $1}' )" >> ips.table
   done
@@ -175,6 +180,24 @@ function baja(){
   if [ -n "$(grep -P $hosts_line $ETC_HOSTS)" ]; then
     echo "$line_content Removiendo de $ETC_HOSTS"
     sudo sed -i".bak" "/$hosts_line/d" $ETC_HOSTS
+  else
+    echo "$hosts_line no existe en $ETC_HOSTS";
+  fi
+  tput cnorm;
+}
+function remplazo(){
+  ip=$1
+  host=$2
+  ipN=$3
+  hostN=$4
+  hosts_line="$ip[[:space:]]$host"
+  line_content=$(printf "%s\t%s\n" "$ip" "$host")
+  hosts_lineN="$ipN[[:space:]]$hostN"
+  line_contentN=$(printf "%s\t%s\n" "$ipN" "$hostN")
+  if [ -n "$(grep -P $hosts_line $ETC_HOSTS)" ]; then
+    echo "$line_content Haciendo cambio en $ETC_HOSTS"
+    sudo sed -i".bak" "/$hosts_line/d" $ETC_HOSTS;
+    sudo echo "$line_contentN" >> $ETC_HOSTS
   else
     echo "$hosts_line no existe en $ETC_HOSTS";
   fi
@@ -223,6 +246,12 @@ else
     if [ "$del_dev_host" ] || [ "$del_dev_ip" ]; then
       baja $del_dev_host $del_dev_ip
     else 
+      helpPanel
+    fi
+  elif [ "$(echo $Cambios_mode)" == "remplazo" ]; then
+    if [ "$add_dev_host" ] && [ "$add_dev_ip" ] && [ "$del_dev_host" ] && [ "$del_dev_ip" ]; then
+      remplazo $add_dev_host $add_dev_ip $del_dev_host $del_dev_ip
+    else
       helpPanel
     fi
   fi 
