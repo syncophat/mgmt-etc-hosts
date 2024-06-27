@@ -126,9 +126,11 @@ function helpPanel(){
 function search_IP(){
   #IP a consultar
   ip=$1
+  cont=0
   echo '' > ips.tmp
-  while [ "$(cat ips.tmp | wc -l)" == "1" ]; do 
+  while [ "$(cat ips.tmp | wc -l)" == "1" ] && [ "$cont" == "0" ]; do 
     $(cat $ETC_HOSTS | grep $ip  >> ips.tmp) 
+    cont+=1;
   done
   Hostname=$(cat ips.tmp | grep $ip | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')
   echo "IP~Host" > ips2.table
@@ -144,9 +146,11 @@ function search_IP(){
 function search_HOST(){
   #HOSTNAME a consultar
   hosts=$1
+  cont=0
   echo '' > ips.tmp
-  while [ "$(cat ips.tmp | wc -l)" == "1" ]; do 
+  while [ "$(cat ips.tmp | wc -l)" == "1" ] && [ "$cont" == "0" ]; do 
     $(cat $ETC_HOSTS | grep $hosts >> ips.tmp)
+    cont+=1
   done
   echo "Host~IP" > ips2.table
   Hostname=$(cat ips.tmp | grep $hosts | awk '{print $2}')
