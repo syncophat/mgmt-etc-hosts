@@ -155,7 +155,6 @@ function helpPanel(){
   echo -e "\t\t${purpleColour}busqueda_IP${endColour}${grayColour}[-e][-i]${endColour}${yellowColour}: Busca un Dev por IP${endColour}${blueColour}(ejemplo ./mgmt-etc-hosts.sh -e busqueda_IP -i 192.168.0.0 )"
   echo -e "\t\t${purpleColour}busqueda_HOST${endColour}${grayColour}[-e][-j]${endColour}${yellowColour}: Busca un Dev por hostname${endColour}${blueColour}(ejemplo ./mgmt-etc-hosts.sh -e busqueda_HOST -j hostname )"
   echo -e "\n\n\t${grayColour}[-a]${endColour}${yellowColour}Modo alta y cambios${endColour}"
-  echo -e "\t\t${purpleColour}cambios${endColour}${yellowColour}:\t\t\t Cambio de Host o IP${endColour}"
   echo -e "\t\t${purpleColour}alta${endColour}${yellowColour}:\t\t\t Agrega un Dev en la lista${blueColour}(ejemplo ./mgmt-etc-hosts.sh -a alta -b 192.168.0.0 -c dev.com)${endColour}"
   echo -e "\t\t${purpleColour}baja${endColour}${yellowColour}:\t\t\t Elimina un Dev en la lista${endColour}${blueColour}(ejemplo ./mgmt-etc-hosts.sh -a baja -d 192.168.0.0 -f dev.com)${endColour}"
   echo -e "\n\t${grayColour}remplazo${endColour}${yellowColour} Cambiar IP o HOST del archivo hosts${endColour}"
