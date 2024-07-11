@@ -47,21 +47,26 @@ mgmt-etc-hosts.sh -h
 ### Screenshots
 
 ![](./Images/Panel_Ayuda.png)
+
 **Panel de Ayuda**
 
 ![](./Images/busqueda_IP.png)
+
 **Busqueda por IP**
 
 ![](./Images/busqueda_host.png)
 **Busqueda Por Host**
 
 ![](./Images/alta.png)
+
 **Alta de un Host**
 
 ![](./Images/baja.png)
+
 **Baja de un Hosts**
 
 ![](./Images/remplazo.png)
+
 **Cambio de IP o Hosts a una entrada existente**
 
 ##### Espero que te sea de utilidad este script, si es el caso apoyame con haciendo "★ Star" en este repositorio.¡Gracias!
