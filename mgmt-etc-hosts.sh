@@ -1,7 +1,39 @@
 #!/bin/bash
-##Author: Syncophat
-#Colours
+##Author: Syncophat, Ricardo Peña
+##  +-----------------------------------------------------------------------+
+##  |                                                                       |
+##  | Copyright (c) 2019-2024, Ricardo Peña <syncophat.drums@gmail.com>.    |
+##  |                                                                       |
+##  | This program is free software: you can redistribute it and/or modify  |
+##  | it under the terms of the GNU General Public License as published by  |
+##  | the Free Software Foundation, either version 3 of the License, or     |
+##  | (at your option) any later version.                                   |
+##  |                                                                       |
+##  | This program is distributed in the hope that it will be useful,       |
+##  | but WITHOUT ANY WARRANTY; without even the implied warranty of        |
+##  | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         |
+##  | GNU General Public License for more details.                          |
+##  |                                                                       |
+##  | You should have received a copy of the GNU General Public License     |
+##  | along with this program. If not, see <http://www.gnu.org/licenses/>.  |
+##  |                                                                       |
+##  +-----------------------------------------------------------------------+
 #
+#     Descripción
+#
+#     Este script esta pensado para administrar el achivo /etc/hosts, 
+#     y enfocado para los administradores de redes, utilizando el consepto 
+#     de que se hace una relación de dominios a una IP de forma local.
+#     El ejemplo para lo que fue diseñado, es almacenar la IP y el hostname
+#     del dispositivo, al usar las funciones de telnet o ssh, sean dirijidas
+#     al nombre del dispositio.
+#     "telnet SW_1 o ssh SW_1"
+#
+#     Este script tiene dos modos de utilización.
+#     1. Modo exploración, nos permite buscar IP o Hostname 
+#     2. Modo Cambios, nos permite hacer alta, baja o cambios
+#
+#Definiciñon de colores de la terminal.
 greenColour="\e[0;32m\033[1m"
 endColour="\033[0m\e[0m"
 redColour="\e[0;31m\033[1m"
@@ -12,12 +44,17 @@ turquoiseColour="\e[0;36m\033[1m"
 grayColour="\e[0;37m\033[1m"
 #Path hosts
 ETC_HOSTS=/etc/hosts
-
+#
+#Función para habilitar el uso de ctrl_c para interrumpir y el envio del cursor nuevamente
+#
 trap ctrl_c INT
 function ctrl_c (){
   echo -e "\n${redColour}[!] Saliendo...\n${endColour}"
   tput cnorm; exit 1 
 }
+#
+#Funciones para crear tablas
+#
 function printTable(){
 
     local -r delimiter="${1}"
@@ -105,9 +142,14 @@ function trimString(){
     local -r string="${1}"
     sed 's,^[[:blank:]]*,,' <<< "${string}" | sed 's,[[:blank:]]*$,,'
 }
-
+#
+#
+#===================================================================
+# Panel de ayuda 
+#===================================================================
+#
 function helpPanel(){
-  echo -e "\n${redColour}[!] Uso: ./sdev${endColour}"
+  echo -e "\n${redColour}[!] Uso: mgmt-etc-hosts.sh ${endColour}"
   for i in $(seq 1 80); do echo -ne "${redColour}-"; done; echo -ne "${endColour}"
   echo -e "\n\n\t${grayColour}[-e]${endColour}${yellowColour} Modo Exploración${endColour}"
   echo -e "\t\t${purpleColour}busqueda_IP${endColour}${grayColour}[-e][-i]${endColour}${yellowColour}: Busca un Dev por IP${endColour}${blueColour}(ejemplo ./mgmt-etc-hosts.sh -e busqueda_IP -i 192.168.0.0 )"
@@ -119,10 +161,13 @@ function helpPanel(){
   echo -e "\n\t${grayColour}remplazo${endColour}${yellowColour} Cambiar IP o HOST del archivo hosts${endColour}"
   echo -e "\t\t${purpleColour}[-b -c -d -f]${endColour}${yellowColour}:\t\t\t IP y host en $ETC_HOSTS y IP y host a remplazar${endColour}${blueColour} ejemplo: .\mgmt-etc-hosts -a cambio -b 192.168.0.0 -c dev.com -d 192.168.1.0 -f dev.net${endColour}"
   echo -e "\n\t${grayColour}[-h]${endColour}${yellowColour} Mostrar este panel de ayuda${endColour}"
-  
-  
   tput cnorm; exit 1
 }
+#
+#===================================================================
+# Función para Buscar IP's
+#===================================================================
+#
 function search_IP(){
   #IP a consultar
   ip=$1
@@ -143,6 +188,11 @@ function search_IP(){
     rm ips*
     tput cnorm;
    }
+#
+#===================================================================
+# Función para Buscar Hosts's
+#===================================================================
+#
 function search_HOST(){
   #HOSTNAME a consultar
   hosts=$1
@@ -163,6 +213,11 @@ function search_HOST(){
   rm ips*
   tput cnorm;
 }
+#
+#===================================================================
+# Función para dar de alta nuevos dispositivos en el /etc/hosts 
+#===================================================================
+#
 function alta(){
   ip=$1
   host=$2
@@ -176,6 +231,11 @@ function alta(){
   fi
   tput cnorm;
 }
+#
+#===================================================================
+# Función para dar de baja IP's o Host's
+#===================================================================
+#
 function baja(){
   ip=$1 
   host=$2 
@@ -189,6 +249,11 @@ function baja(){
   fi
   tput cnorm;
 }
+#
+#===================================================================
+# Función para remplazar, se requiere 4 argumentos.
+#===================================================================
+#
 function remplazo(){
   ip=$1
   host=$2
@@ -207,7 +272,11 @@ function remplazo(){
   fi
   tput cnorm;
 }
-
+#
+#===================================================================
+# Gestión de parametros para el script 
+#===================================================================
+#
 parameter_counter=0; while getopts "a:b:c:d:f:e:i:j:h:" arg; do 
   case $arg in 
     e) exploration_mode=$OPTARG; let parameter_counter+=1;;
@@ -222,9 +291,12 @@ parameter_counter=0; while getopts "a:b:c:d:f:e:i:j:h:" arg; do
 
   esac
 done
-
 tput civis
-
+#
+#===================================================================
+# Gestión del flujo del script
+#===================================================================
+#
 if [ $parameter_counter -eq 0 ]; then
   helpPanel
 else
