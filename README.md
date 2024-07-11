@@ -55,6 +55,7 @@ mgmt-etc-hosts.sh -h
 **Busqueda por IP**
 
 ![](./Images/busqueda_host.png)
+
 **Busqueda Por Host**
 
 ![](./Images/alta.png)
